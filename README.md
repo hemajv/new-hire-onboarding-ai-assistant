@@ -1,1 +1,1 @@
-# new-hire-onboarding-ai-assistant
+# New Hire Onboarding AI Assistant
