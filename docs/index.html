@@ -99,22 +99,31 @@
                 <div class="flex items-center">
                     <span class="text-2xl font-bold text-red-600 font-display">OCTO Onboarding</span>
                 </div>
-                <div class="hidden md:block">
-                    <div id="desktop-nav" class="ml-10 flex items-baseline space-x-4">
-                        <a href="#welcome" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Welcome</a>
-                        <a href="#structure" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">How We Work</a>
-                        <a href="#initiatives" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Portfolio</a>
-                        <a href="#culture" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Culture</a>
-                        <a href="#roadmap" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Your Roadmap</a>
+                <div class="flex items-center">
+                    <div class="hidden md:block">
+                        <div id="desktop-nav" class="ml-10 flex items-baseline space-x-4">
+                            <a href="#welcome" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Welcome</a>
+                            <a href="#structure" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">How We Work</a>
+                            <a href="#initiatives" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Portfolio</a>
+                            <a href="#culture" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Culture</a>
+                            <a href="#roadmap" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Your Roadmap</a>
+                        </div>
                     </div>
-                </div>
-                <div class="md:hidden">
-                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-red-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-red-500">
-                        <span class="sr-only">Open main menu</span>
-                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
+                    <div class="bg-teal-50 border-b border-teal-200 py-3 px-4 flex items-center justify-center">
+                        <span class="mr-3 text-teal-800 font-medium">🎧 Listen to the podcast version:</span>
+                        <audio controls class="align-middle h-8">
+                            <source src="podcast.wav" type="audio/wav">
+                            Your browser does not support the audio element. <a href="../podcast.wav" class="text-teal-700 underline">Download here</a>.
+                        </audio>
+                    </div>
+                    <div class="md:hidden ml-4">
+                        <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-red-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-red-500">
+                            <span class="sr-only">Open main menu</span>
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -125,6 +134,12 @@
                 <a href="#initiatives" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">Portfolio</a>
                 <a href="#culture" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">Culture</a>
                 <a href="#roadmap" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">Your Roadmap</a>
+                <div class="w-full text-left px-3 py-2 mt-2 flex items-center space-x-2 text-gray-700">
+                    <span class="text-sm">Listen to the podcast version:</span>
+                    <div class="flex justify-center items-center w-full">
+                        <audio id="podcast-audio-mobile" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" controls preload="none" class="align-middle h-8 w-full"></audio>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -278,7 +293,7 @@
                 },
                 {
                     name: "Initiative Lead",
-                    icon: "�",
+                    icon: "🧭",
                     description: "Drives the big-picture outcomes of the entire Initiative. Sets the vision and communicates with stakeholders and executive leadership.",
                     askFor: "The Initiative's overall strategy, how your project fits into the bigger picture."
                 },
