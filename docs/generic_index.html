@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Interactive Onboarding AI Assistant</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Chosen Palette: Warm Neutrals -->
+
+    <!-- Application Structure Plan: The SPA is designed as an "Onboarding AI Assistant" to guide HR professionals. The structure prioritizes a non-linear, task-oriented exploration over a linear document review. The core is an interactive timeline of the onboarding journey (Pre-board, Day 1, etc.). Clicking a phase reveals suitable interactive techniques (as cards) for that stage. Clicking a technique card opens a modal with details (description, tools, benefits). This layered approach makes the dense report digestible and actionable. It's supported by secondary sections with interactive charts for benefits and clickable tags for key concepts, allowing users to explore foundational knowledge on demand. This structure was chosen to be "meta" – an interactive tool to learn about building interactive experiences, enhancing user engagement and understanding. -->
+
+    <!-- Visualization & Content Choices: 
+
+        1. Report Info: Onboarding Journey Phases. Goal: Organize & Explore. Viz: Interactive tabs/buttons for each phase. Interaction: Click to filter a grid of "technique cards". Justification: Breaks down the report's core into a manageable, two-level interactive experience. Library: JS DOM manipulation.
+
+        2. Report Info: Benefits & Stats (e.g., 82% retention). Goal: Inform & Compare. Viz: Horizontal bar chart. Interaction: Hover for tooltips with specific stats. Justification: More impactful than a list; interactivity adds engagement. Library: Chart.js.
+
+        3. Report Info: Interactive Techniques (Gamification, VR, etc.). Goal: Inform & Organize. Viz: Grid of cards. Interaction: Click to open a modal with details. Justification: Standard, scannable UI for a collection of items; modals allow deep dives without context switching. Library: JS DOM manipulation.
+
+        4. Report Info: Measuring Success. Goal: Inform. Viz: Flippable cards for each metric. Interaction: Click/hover to "flip" the card and reveal details. Justification: A novel interaction to make statistical information more engaging. Library: HTML/CSS/JS.
+
+    -->
+
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <style>
+
+        body {
+
+            font-family: 'Inter', sans-serif;
+
+            background-color: #FDF8F0;
+
+            color: #3D405B;
+
+        }
+
+        .main-container {
+
+            max-width: 1200px;
+
+            margin: 0 auto;
+
+            padding: 0 1rem;
+
+        }
+
+        .phase-button {
+
+            transition: all 0.3s ease;
+
+        }
+
+        .phase-button.active {
+
+            background-color: #A8C5A8;
+
+            color: white;
+
+            transform: translateY(-2px);
+
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+
+        }
+
+        .technique-card {
+
+            transition: all 0.3s ease;
+
+            transform-style: preserve-3d;
+
+        }
+
+        .technique-card:hover {
+
+            transform: translateY(-5px);
+
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+
+        }
+
+        .modal {
+
+            transition: opacity 0.3s ease;
+
+        }
+
+        .modal-content {
+
+            transition: transform 0.3s ease;
+
+        }
+
+        .metric-card-inner {
+
+            transition: transform 0.6s;
+
+            transform-style: preserve-3d;
+
+        }
+
+        .metric-card:hover .metric-card-inner {
+
+            transform: rotateY(180deg);
+
+        }
+
+        .metric-card-front, .metric-card-back {
+
+            -webkit-backface-visibility: hidden;
+
+            backface-visibility: hidden;
+
+        }
+
+        .metric-card-back {
+
+            transform: rotateY(180deg);
+
+        }
+
+        .chart-container {
+
+            position: relative;
+
+            width: 100%;
+
+            max-width: 700px;
+
+            margin-left: auto;
+
+            margin-right: auto;
+
+            height: 350px;
+
+            max-height: 400px;
+
+        }
+
+        @media (min-width: 768px) {
+
+            .chart-container {
+
+                height: 400px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body class="antialiased">
+
+
+
+    <header class="py-6 sm:py-8">
+
+        <div class="main-container text-center">
+
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold text-[#3D405B]">Onboarding AI Assistant</h1>
+
+            <p class="mt-2 text-lg sm:text-xl text-[#82869E]">Your interactive guide to designing world-class new hire experiences.</p>
+
+        </div>
+
+    </header>
+
+
+
+    <main class="main-container">
+
+
+
+        <section id="introduction" class="text-center bg-white/60 rounded-xl p-6 sm:p-8 shadow-sm">
+
+            <h2 class="text-2xl font-semibold mb-4 text-[#A8C5A8]">Transform Onboarding from a Task to an Experience</h2>
+
+            <p class="text-base md:text-lg max-w-3xl mx-auto">This tool translates the comprehensive 'Blueprint for Interactive Onboarding' report into an actionable framework. The goal isn't just to inform, but to inspire. Explore the proven strategies and interactive techniques that boost engagement, accelerate productivity, and build lasting connections from Day One. Start by exploring the different phases of the onboarding journey below.</p>
+
+        </section>
+
+
+
+        <section id="journey" class="mt-12 sm:mt-16">
+
+            <h2 class="text-3xl font-bold text-center mb-8">The Interactive Onboarding Journey</h2>
+
+            <p class="text-center text-lg text-gray-600 max-w-3xl mx-auto mb-10">The onboarding process is a multi-stage journey. Each phase has unique goals and is an opportunity for specific types of interaction. Select a phase to explore tailored ideas and best practices.</p>
+
+            <div id="phase-selector" class="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8"></div>
+
+            <div id="technique-gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[300px]"></div>
+
+        </section>
+
+
+
+        <section id="benefits" class="mt-12 sm:mt-20 bg-white/60 rounded-xl p-6 sm:p-8 shadow-sm">
+
+            <h2 class="text-3xl font-bold text-center mb-4">Why Go Interactive? The Business Case</h2>
+
+             <p class="text-center text-lg text-gray-600 max-w-3xl mx-auto mb-8">Investing in a great onboarding experience isn't just about making new hires feel good—it delivers tangible business outcomes. The data shows significant improvements in retention, satisfaction, and productivity. Hover over the chart below to see the impact.</p>
+
+            <div class="chart-container">
+
+                <canvas id="benefitsChart"></canvas>
+
+            </div>
+
+        </section>
+
+        
+
+        <section id="core-concepts" class="mt-12 sm:mt-16">
+
+            <h2 class="text-3xl font-bold text-center mb-8">What Should Be Interactive?</h2>
+
+            <p class="text-center text-lg text-gray-600 max-w-3xl mx-auto mb-10">While interactivity is powerful, it's most effective when applied strategically. The report identifies several key content areas where an interactive approach yields the highest return on engagement and understanding. Click on the topics below to learn more.</p>
+
+            <div class="flex flex-wrap justify-center gap-3 sm:gap-4" id="interactive-topics-container"></div>
+
+            <div id="topic-explanation" class="mt-6 p-6 bg-white/60 rounded-xl shadow-sm text-center min-h-[100px] flex items-center justify-center">
+
+                <p class="text-lg text-gray-700">Select a topic to see why it's a prime candidate for interactivity.</p>
+
+            </div>
+
+        </section>
+
+
+
+        <section id="metrics" class="mt-12 sm:mt-16">
+
+            <h2 class="text-3xl font-bold text-center mb-8">Measuring Success</h2>
+
+             <p class="text-center text-lg text-gray-600 max-w-3xl mx-auto mb-10">A great onboarding program is a living program. To ensure its effectiveness, it's crucial to measure its impact. Hover over the cards to learn about the key metrics you should be tracking.</p>
+
+            <div id="metrics-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+
+        </section>
+
+
+
+    </main>
+
+
+
+    <footer class="mt-16 py-8 text-center text-gray-500">
+
+        <p>Built with insights from the "Blueprint for Interactive Onboarding" report.</p>
+
+    </footer>
+
+
+
+    <div id="techniqueModal" class="modal fixed inset-0 bg-black bg-opacity-60 hidden items-center justify-center p-4 z-50 opacity-0" onclick="closeModal()">
+
+        <div class="modal-content bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto transform scale-95" onclick="event.stopPropagation()">
+
+            <div class="p-6 sm:p-8">
+
+                <div class="flex justify-between items-start">
+
+                    <div>
+
+                        <h3 id="modal-title" class="text-2xl font-bold text-[#3D405B]"></h3>
+
+                        <p id="modal-category" class="text-sm font-medium text-[#A8C5A8] mt-1"></p>
+
+                    </div>
+
+                    <button onclick="closeModal()" class="text-gray-400 hover:text-gray-700 transition-colors">&times;</button>
+
+                </div>
+
+                <div class="mt-6 prose max-w-none">
+
+                    <p id="modal-description" class="text-base"></p>
+
+                    <div class="mt-6">
+
+                        <h4 class="font-semibold text-lg">Key Benefits:</h4>
+
+                        <ul id="modal-benefits" class="list-disc pl-5 space-y-1"></ul>
+
+                    </div>
+
+                    <div class="mt-6">
+
+                        <h4 class="font-semibold text-lg">Example Tools:</h4>
+
+                        <p id="modal-tools" class="text-base"></p>
+
+                    </div>
+
+                     <div class="mt-6 bg-[#FDF8F0] p-4 rounded-lg">
+
+                        <h4 class="font-semibold text-lg flex items-center"><span class="mr-2">💡</span>Pro Tip:</h4>
+
+                        <p id="modal-protip" class="text-base mt-2"></p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+<script>
+
+    const db = {
+
+        onboardingPhases: [
+
+            {
+
+                id: 'pre-boarding',
+
+                name: 'Pre-boarding',
+
+                objective: 'Build excitement, reduce anxiety, and handle logistics before the first day.',
+
+                techniques: ['personalized-videos', 'gamified-paperwork', 'virtual-tour', 'ceo-welcome']
+
+            },
+
+            {
+
+                id: 'first-day',
+
+                name: 'First Day',
+
+                objective: 'Create a memorable welcome, orient to the workspace, and foster initial connections.',
+
+                techniques: ['virtual-tour', 'interactive-welcome-kit', 'whos-who-games', 'interactive-overview']
+
+            },
+
+            {
+
+                id: 'first-week',
+
+                name: 'First Week',
+
+                objective: 'Provide foundational knowledge, clarify the role, and deepen team integration.',
+
+                techniques: ['interactive-checklists', 'sbt', 'buddy-mentor', 'jargon-quiz']
+
+            },
+
+            {
+
+                id: 'first-90-days',
+
+                name: 'First 90 Days & Beyond',
+
+                objective: 'Sustain engagement, deepen skills, track progress, and foster long-term integration.',
+
+                techniques: ['advanced-sbt', 'interactive-goals', 'knowledge-refreshers', 'feedback-surveys']
+
+            }
+
+        ],
+
+        techniques: {
+
+            'personalized-videos': {
+
+                name: 'Personalized Videos',
+
+                icon: '📹',
+
+                category: 'Interactive Media',
+
+                description: 'Welcome messages from the team leader or CEO that address the new hire by name, creating an immediate personal connection.',
+
+                benefits: ['Creates a strong personal connection', 'Makes new hires feel seen and valued', 'High impact for remote employees'],
+
+                tools: 'Idomoo, Vimeo (with Wirewax), Synthesia',
+
+                protip: 'Authenticity is key. A simple, heartfelt message from a smartphone can be more effective than a high-production but impersonal video.'
+
+            },
+
+            'gamified-paperwork': {
+
+                name: 'Gamified Paperwork',
+
+                icon: '📝',
+
+                category: 'Gamification',
+
+                description: 'Turn the administrative process of filling out forms into a guided, less burdensome experience using progress bars, checklists, and a clear step-by-step process.',
+
+                benefits: ['Reduces administrative friction', 'Improves user experience for necessary tasks', 'Provides clarity on what needs to be done'],
+
+                tools: 'Dedicated Onboarding Platforms (e.g., BambooHR, Workday), custom portals',
+
+                protip: 'This is less about winning a game and more about providing a sense of progress and accomplishment for completing essential tasks.'
+
+            },
+
+            'virtual-tour': {
+
+                name: 'VR / 360° Office Tour',
+
+                icon: '🏢',
+
+                category: 'Immersive Technologies',
+
+                description: 'Allow new hires, especially remote ones, to explore the workspace through an interactive 360° tour with clickable hotspots for information on departments, amenities, or colleagues.',
+
+                benefits: ['Reduces first-day anxiety about navigation', 'Excellent for remote/hybrid teams', 'Highly engaging and memorable'],
+
+                tools: 'Kuula, 3DVista, Matterport',
+
+                protip: 'Embed short video clips or fun facts in the hotspots to make the tour more dynamic and personal.'
+
+            },
+
+            'ceo-welcome': {
+
+                name: 'CEO Welcome Message',
+
+                icon: '👑',
+
+                category: 'Personalization',
+
+                description: 'A thoughtful message from the CEO that connects the new hire\'s role to the company\'s overall vision and mission.',
+
+                benefits: ['Makes new hire feel valued at the highest level', 'Reinforces company mission and vision', 'Builds early connection to leadership'],
+
+                tools: 'Email, Onboarding Platform Video, Personalized Video Tools',
+
+                protip: 'The message should be about the company\'s vision and the new hire\'s importance in it, rather than just a generic welcome.'
+
+            },
+
+            'interactive-welcome-kit': {
+
+                name: 'Interactive Welcome Kit',
+
+                icon: '🎁',
+
+                category: 'Personalization',
+
+                description: 'Go beyond standard swag with kits that include items prompting interaction, like QR codes to resources, a "first week bucket list" checklist, or conversation starter cards.',
+
+                benefits: ['Creates a tangible, exciting first-day experience', 'Encourages immediate interaction and exploration', 'Signals a thoughtful and creative company culture'],
+
+                tools: 'In-house assembly, third-party swag companies',
+
+                protip: 'Include an item that requires collaboration, like a puzzle piece that matches with their buddy\'s piece.'
+
+            },
+
+             'whos-who-games': {
+
+                name: '‘Who’s Who’ Games',
+
+                icon: '👥',
+
+                category: 'Social Interaction',
+
+                description: 'Fun, engaging activities like "People Bingo" or matching baby photos to colleagues to help new hires learn about their team in a low-pressure way.',
+
+                benefits: ['Accelerates relationship building', 'Lowers barriers to communication', 'Makes learning about the team fun'],
+
+                tools: 'Low-tech (paper), online whiteboards (Miro), internal communication channels',
+
+                protip: 'Keep it light and focus on fun facts rather than just job titles to encourage more personal connections.'
+
+            },
+
+            'interactive-overview': {
+
+                name: 'Interactive Company Overview',
+
+                icon: '🏛️',
+
+                category: 'Gamification',
+
+                description: 'Instead of a passive PowerPoint, convey company history, mission, and values through a quiz game, a clickable timeline, or a collaborative discovery activity.',
+
+                benefits: ['Improves retention of core company information', 'Far more engaging than a lecture', 'Sets a dynamic tone for the company culture'],
+
+                tools: 'Articulate 360, Genially, or custom-built web modules',
+
+                protip: 'Frame it as a "discovery mission" where teams of new hires work together to find answers.'
+
+            },
+
+            'interactive-checklists': {
+
+                name: 'Interactive Checklists',
+
+                icon: '✅',
+
+                category: 'Gamification',
+
+                description: 'Provide a digital checklist that visually tracks progress through onboarding tasks. Gamify it with points, badges, or celebratory animations for completing sections.',
+
+                benefits: ['Provides clarity and reduces overwhelm', 'Fosters a sense of accomplishment', 'Easy to track for both new hire and manager'],
+
+                tools: 'Onboarding Platforms, Trello, Asana, Userpilot',
+
+                protip: 'A 40% increase in user activation was seen by one platform that implemented a gamified checklist. Visual progress is a powerful motivator.'
+
+            },
+
+            'sbt': {
+
+                name: 'Scenario-Based Training (SBT)',
+
+                icon: '🤔',
+
+                category: 'Hands-on Learning',
+
+                description: 'Present realistic work challenges and require the new hire to make decisions, then show the consequences. Highly effective for developing critical thinking and problem-solving skills.',
+
+                benefits: ['Develops practical decision-making skills', 'Safe environment to learn from mistakes', 'Directly relevant to job performance'],
+
+                tools: 'eLearning Authoring Tools (Articulate 360), Interactive Video Platforms',
+
+                protip: 'Use branching logic where different choices lead to different outcomes, making the training replayable and more nuanced.'
+
+            },
+
+            'buddy-mentor': {
+
+                name: 'Buddy/Mentor Interactions',
+
+                icon: '🤝',
+
+                category: 'Social Interaction',
+
+                description: 'Structure interactions with an assigned buddy or mentor, using tools like gamified "get to know you" question lists or a collaborative review of a key process.',
+
+                benefits: ['Provides a safe, go-to person for questions', 'Deepens cultural integration', 'Personalizes the onboarding experience'],
+
+                tools: 'Conversation card decks, shared documents, scheduled coffee chats',
+
+                protip: 'The mentor is an "interactivity amplifier," turning a digital experience into a human-centric learning opportunity.'
+
+            },
+
+            'jargon-quiz': {
+
+                name: 'Company Jargon Quiz',
+
+                icon: '🗣️',
+
+                category: 'Gamification',
+
+                description: 'Help new hires learn company-specific acronyms and terminology with an interactive quiz, matching game, or digital flashcards instead of a static glossary.',
+
+                benefits: ['Makes learning internal language faster and more fun', 'Reduces feelings of being an outsider', 'Improves communication efficiency'],
+
+                tools: 'Quizlet, Kahoot!, or custom modules in an LMS',
+
+                protip: 'Include some humorous or historical (but now defunct) terms to add personality.'
+
+            },
+
+             'advanced-sbt': {
+
+                name: 'Advanced Simulations',
+
+                icon: '⚙️',
+
+                category: 'Hands-on Learning',
+
+                description: 'For deeper learning, use complex simulations, interactive case studies, or branching scenarios that mirror real-world projects or difficult customer interactions.',
+
+                benefits: ['Builds deep, role-specific expertise', 'Tests application of knowledge under pressure', 'Prepares for complex, infrequent events'],
+
+                tools: 'Custom eLearning development, VR simulations (for physical tasks)',
+
+                protip: 'Provide detailed feedback after the simulation, explaining the optimal path and why certain decisions were better than others.'
+
+            },
+
+            'interactive-goals': {
+
+                name: 'Interactive Goal Setting',
+
+                icon: '🎯',
+
+                category: 'Personalization',
+
+                description: 'Use a collaborative tool or platform where new hires and their managers can set, track, and review 30-60-90 day goals, with visual progress indicators.',
+
+                benefits: ['Provides clear expectations and a roadmap for success', 'Fosters manager-employee alignment', 'Creates a bridge to ongoing performance management'],
+
+                tools: 'Performance Management Software, shared project boards (Trello)',
+
+                protip: 'Ensure goals are SMART (Specific, Measurable, Achievable, Relevant, Time-bound) and are reviewed regularly.'
+
+            },
+
+            'knowledge-refreshers': {
+
+                name: 'Knowledge Refreshers',
+
+                icon: '🔄',
+
+                category: 'Gamification',
+
+                description: 'Combat the "forgetting curve" with periodic short quizzes, micro-learning modules, or interactive challenges sent via email or chat to reinforce key information.',
+
+                benefits: ['Improves long-term knowledge retention', 'Keeps key information top-of-mind', 'Can be delivered in a non-intrusive way'],
+
+                tools: 'LMS drip campaigns, quiz tools, email automation',
+
+                protip: 'Space these out over time (e.g., at 30, 60, and 90 days) for maximum effect, a technique known as spaced repetition.'
+
+            },
+
+            'feedback-surveys': {
+
+                name: 'Interactive Feedback Surveys',
+
+                icon: '💬',
+
+                category: 'Measurement',
+
+                description: 'Gather feedback on the onboarding experience at key milestones using pulse surveys. Make them interactive to increase completion rates.',
+
+                benefits: ['Provides crucial data for program improvement', 'Makes new hires feel heard and valued', 'Identifies friction points in the process'],
+
+                tools: 'SurveyMonkey, Google Forms, dedicated employee feedback tools (BambooHR)',
+
+                protip: 'Acting on the feedback and communicating the changes you\'ve made is the most powerful part of this process.'
+
+            },
+
+        },
+
+        interactiveTopics: [
+
+            {
+
+                name: 'Culture & Values',
+
+                explanation: 'Abstract concepts like culture become tangible and memorable through interactive scenarios or story-based modules that show values in action.'
+
+            },
+
+            {
+
+                name: 'Role Expectations',
+
+                explanation: 'Interactive job simulations or scenario-based training for common tasks clarify a new hire\'s role and its impact more effectively than a job description.'
+
+            },
+
+            {
+
+                name: 'Compliance & Policies',
+
+                explanation: 'Critical but often dry material can be made engaging and digestible through interactive quizzes with immediate feedback, ensuring comprehension.'
+
+            },
+
+            {
+
+                name: 'Tools & Systems',
+
+                explanation: 'Guided, hands-on tutorials or "sandbox" practice environments are far more effective for software training than passive manuals.'
+
+            }
+
+        ],
+
+        metrics: [
+
+             {
+
+                name: 'New Hire Satisfaction',
+
+                icon: '😊',
+
+                description: 'Regularly survey new hires on their experience. High satisfaction is a leading indicator of long-term success and engagement.'
+
+            },
+
+            {
+
+                name: 'Time to Productivity',
+
+                icon: '🚀',
+
+                description: 'Measure how quickly new hires become fully contributing team members. Effective onboarding significantly shortens this ramp-up time.'
+
+            },
+
+            {
+
+                name: 'Early Turnover Rate',
+
+                icon: '📉',
+
+                description: 'Track voluntary turnover within the first year. A great onboarding experience can improve retention by up to 82%.'
+
+            },
+
+             {
+
+                name: 'Module Completion',
+
+                icon: '📊',
+
+                description: 'Track completion rates of interactive courses and tasks. This provides direct insight into how engaging and clear your content is.'
+
+            },
+
+             {
+
+                name: 'Skill Acquisition',
+
+                icon: '🧠',
+
+                description: 'Assess knowledge and skills through post-training quizzes, simulations, and manager feedback to ensure learning objectives are met.'
+
+            },
+
+            {
+
+                name: 'Manager Feedback',
+
+                icon: '👍',
+
+                description: 'Gather input from managers on their new hire\'s preparedness and integration. They have the best view of real-world impact.'
+
+            }
+
+        ]
+
+    };
+
+    
+
+    let currentPhase = 'pre-boarding';
+
+
+
+    function initializeApp() {
+
+        renderPhaseSelector();
+
+        renderTechniqueGallery();
+
+        renderBenefitsChart();
+
+        renderInteractiveTopics();
+
+        renderMetricsGrid();
+
+    }
+
+
+
+    function renderPhaseSelector() {
+
+        const selectorContainer = document.getElementById('phase-selector');
+
+        selectorContainer.innerHTML = db.onboardingPhases.map(phase => `
+
+            <button
+
+                class="phase-button px-4 py-2 rounded-full text-sm sm:text-base font-semibold bg-white shadow-sm hover:bg-[#D4B996] hover:text-white ${phase.id === currentPhase ? 'active' : ''}"
+
+                onclick="selectPhase('${phase.id}')"
+
+                data-phase-id="${phase.id}"
+
+            >
+
+                ${phase.name}
+
+            </button>
+
+        `).join('');
+
+    }
+
+
+
+    function renderTechniqueGallery() {
+
+        const galleryContainer = document.getElementById('technique-gallery');
+
+        const phaseData = db.onboardingPhases.find(p => p.id === currentPhase);
+
+        
+
+        galleryContainer.innerHTML = phaseData.techniques.map(techniqueId => {
+
+            const technique = db.techniques[techniqueId];
+
+            return `
+
+                <div class="technique-card bg-white rounded-xl shadow-sm p-5 flex flex-col items-center text-center cursor-pointer" onclick="openModal('${techniqueId}')">
+
+                    <div class="text-4xl mb-3">${technique.icon}</div>
+
+                    <h4 class="font-semibold text-base flex-grow">${technique.name}</h4>
+
+                    <p class="text-xs text-gray-500 mt-2">${technique.category}</p>
+
+                </div>
+
+            `;
+
+        }).join('');
+
+    }
+
+    
+
+    function renderInteractiveTopics() {
+
+        const topicsContainer = document.getElementById('interactive-topics-container');
+
+        topicsContainer.innerHTML = db.interactiveTopics.map((topic, index) => `
+
+            <button class="px-4 py-2 rounded-full text-sm sm:text-base font-semibold bg-white shadow-sm hover:bg-[#D4B996] hover:text-white transition-colors"
+
+                    onclick="showTopicExplanation(${index}, this)">
+
+                ${topic.name}
+
+            </button>
+
+        `).join('');
+
+    }
+
+    
+
+    function showTopicExplanation(index, element) {
+
+        const explanationBox = document.getElementById('topic-explanation');
+
+        explanationBox.innerHTML = `<p class="text-lg text-gray-700">${db.interactiveTopics[index].explanation}</p>`;
+
+        
+
+        document.querySelectorAll('#interactive-topics-container button').forEach(btn => {
+
+            btn.classList.remove('bg-[#A8C5A8]', 'text-white');
+
+        });
+
+        element.classList.add('bg-[#A8C5A8]', 'text-white');
+
+    }
+
+
+
+    function renderMetricsGrid() {
+
+        const gridContainer = document.getElementById('metrics-grid');
+
+        gridContainer.innerHTML = db.metrics.map(metric => `
+
+            <div class="metric-card bg-transparent rounded-xl h-48 perspective-[1000px]">
+
+                <div class="metric-card-inner relative w-full h-full text-center">
+
+                    <div class="metric-card-front absolute w-full h-full bg-white shadow-sm rounded-xl p-6 flex flex-col justify-center items-center">
+
+                        <div class="text-4xl mb-3">${metric.icon}</div>
+
+                        <h4 class="font-semibold text-lg">${metric.name}</h4>
+
+                    </div>
+
+                    <div class="metric-card-back absolute w-full h-full bg-[#A8C5A8] text-white shadow-lg rounded-xl p-6 flex items-center justify-center">
+
+                        <p class="text-base">${metric.description}</p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        `).join('');
+
+    }
+
+
+
+    function selectPhase(phaseId) {
+
+        currentPhase = phaseId;
+
+        document.querySelectorAll('.phase-button').forEach(btn => {
+
+            btn.classList.toggle('active', btn.dataset.phaseId === phaseId);
+
+        });
+
+        renderTechniqueGallery();
+
+    }
+
+
+
+    function openModal(techniqueId) {
+
+        const modal = document.getElementById('techniqueModal');
+
+        const technique = db.techniques[techniqueId];
+
+
+
+        document.getElementById('modal-title').innerText = technique.name;
+
+        document.getElementById('modal-category').innerText = technique.category;
+
+        document.getElementById('modal-description').innerText = technique.description;
+
+        document.getElementById('modal-tools').innerText = technique.tools;
+
+        document.getElementById('modal-protip').innerText = technique.protip;
+
+
+
+        const benefitsList = document.getElementById('modal-benefits');
+
+        benefitsList.innerHTML = technique.benefits.map(b => `<li>${b}</li>`).join('');
+
+
+
+        modal.classList.remove('hidden');
+
+        setTimeout(() => modal.classList.add('opacity-100'), 10);
+
+        setTimeout(() => document.querySelector('.modal-content').classList.remove('scale-95'), 10);
+
+    }
+
+
+
+    function closeModal() {
+
+        const modal = document.getElementById('techniqueModal');
+
+        modal.classList.remove('opacity-100');
+
+        document.querySelector('.modal-content').classList.add('scale-95');
+
+        setTimeout(() => modal.classList.add('hidden'), 300);
+
+    }
+
+    
+
+    function renderBenefitsChart() {
+
+        const ctx = document.getElementById('benefitsChart').getContext('2d');
+
+        new Chart(ctx, {
+
+            type: 'bar',
+
+            data: {
+
+                labels: ['Employee Retention', 'Time to Productivity', 'Job Satisfaction', 'Cultural Integration'],
+
+                datasets: [{
+
+                    label: 'Impact of Interactive Onboarding',
+
+                    data: [82, 70, 65, 75],
+
+                    backgroundColor: [
+
+                        'rgba(168, 197, 168, 0.7)',
+
+                        'rgba(212, 185, 150, 0.7)',
+
+                        'rgba(130, 134, 158, 0.7)',
+
+                         'rgba(168, 197, 168, 0.5)',
+
+                    ],
+
+                    borderColor: [
+
+                        'rgba(168, 197, 168, 1)',
+
+                        'rgba(212, 185, 150, 1)',
+
+                        'rgba(130, 134, 158, 1)',
+
+                         'rgba(168, 197, 168, 1)',
+
+                    ],
+
+                    borderWidth: 1
+
+                }]
+
+            },
+
+            options: {
+
+                indexAxis: 'y',
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+
+                        display: false
+
+                    },
+
+                    tooltip: {
+
+                        enabled: true,
+
+                        backgroundColor: '#3D405B',
+
+                        titleFont: { size: 14, weight: 'bold' },
+
+                        bodyFont: { size: 12 },
+
+                        padding: 12,
+
+                        cornerRadius: 8,
+
+                        callbacks: {
+
+                            label: function(context) {
+
+                                let label = context.dataset.label || '';
+
+                                const value = context.raw;
+
+                                const key = context.label;
+
+                                let details = '';
+
+                                if (key === 'Employee Retention') details = `Up to ${value}% improvement in retention rates.`;
+
+                                else if (key === 'Time to Productivity') details = `New hires reach full productivity up to ${value-20}% faster.`;
+
+                                else if (key === 'Job Satisfaction') details = `Significant increase in overall job satisfaction scores.`;
+
+                                else if (key === 'Cultural Integration') details = `Faster and deeper assimilation into company values and norms.`
+
+                                return details;
+
+                            },
+
+                            title: function(context) {
+
+                                return context[0].label;
+
+                            }
+
+                        }
+
+                    }
+
+                },
+
+                scales: {
+
+                    x: {
+
+                        beginAtZero: true,
+
+                         grid: {
+
+                            color: 'rgba(0,0,0,0.05)'
+
+                        },
+
+                        ticks: {
+
+                            display: false
+
+                        }
+
+                    },
+
+                    y: {
+
+                        grid: {
+
+                            display: false
+
+                        },
+
+                        ticks: {
+
+                           font: {
+
+                               size: 14,
+
+                               weight: 500
+
+                           }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        });
+
+    }
+
+
+
+    document.addEventListener('DOMContentLoaded', initializeApp);
+
+</script>
+
+
+
+</body>
+
+</html>
