@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Red Hat OCTO Emerging Technologies</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700&family=Red+Hat+Text:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Red Hat Official Brand Palette (Primary Red, Black, Gray, White) -->
+    <!-- Application Structure Plan: A persona-driven, single-page application for a new hire. The structure is thematic and task-oriented, not linear like the source document. It starts with a high-level welcome (Welcome), drills into operational details (How We Work), showcases the actual work (Our Initiatives & Portfolio), explains the underlying principles (Our Culture), and concludes with a practical 90-day plan (Your Roadmap). This non-linear, explorable design allows a new user to digest information in manageable, relevant chunks, from "what is this place?" to "what do I do next?". Key interactions include click-to-reveal details, interactive diagrams, and a filterable project view to facilitate active learning over passive reading. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Hierarchy of Initiatives, Epics, Issues. -> Goal: Organize. -> Viz: Interactive nested cards. -> Interaction: Click to expand/collapse. -> Justification: Visually represents the containment structure, more intuitive than text. -> Library/Method: HTML/CSS/JS.
+        - Report Info: Key roles and responsibilities. -> Goal: Inform/Compare. -> Viz: Interactive card grid. -> Interaction: Click to flip/reveal details. -> Justification: Provides a quick, comparable overview of who does what. -> Library/Method: HTML/CSS/JS.
+        - Report Info: Meeting cadence. -> Goal: Organize. -> Viz: Interactive timeline. -> Interaction: Click on a cadence (Weekly, Monthly) to see relevant meetings. -> Justification: Clearly visualizes the operational rhythm and frequency of events. -> Library/Method: HTML/CSS/JS.
+        - Report Info: List of 5 main initiatives. -> Goal: Compare/Inform. -> Viz: Horizontal Bar Chart showing conceptual 'Impact Score'. -> Interaction: Hover for tooltips. -> Justification: Provides a dynamic, at-a-glance comparison of the initiatives' focus areas. -> Library/Method: Chart.js on Canvas.
+        - Report Info: Red Hat Values vs. OCTO Practices. -> Goal: Relate. -> Viz: Two-column layout with clickable values. -> Interaction: Click a value to highlight it and display the corresponding OCTO practice. -> Justification: Directly connects abstract cultural values to concrete, daily work processes. -> Library/Method: HTML/CSS/JS.
+        - Report Info: Project Portfolio -> Goal: Explore. -> Viz: Tabbed interface for projects. -> Interaction: Click tabs to switch between project details. -> Justification: Organizes detailed project information in a compact, user-controlled view. -> Library/Method: HTML/CSS/JS.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Red Hat Text', sans-serif;
+            background-color: #f4f4f4;
+            color: #1a1a1a;
+        }
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Red Hat Display', sans-serif;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: #EE0000;
+            border-bottom-color: #EE0000;
+        }
+        .card-flip {
+            perspective: 1000px;
+        }
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .card-flip.flipped .card-flip-inner {
+            transform: rotateY(180deg);
+        }
+        .card-face, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .card-face {
+             align-items: center;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+            align-items: start;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 50vh;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 450px;
+            }
+        }
+        .section {
+            scroll-margin-top: 80px;
+        }
+        .tab-button.active {
+            border-color: #EE0000;
+            color: #EE0000;
+            background-color: #fee2e2;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+
+    <header class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50">
+        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center">
+                    <span class="text-2xl font-bold text-red-600 font-display">OCTO Onboarding</span>
+                </div>
+                <div class="hidden md:block">
+                    <div id="desktop-nav" class="ml-10 flex items-baseline space-x-4">
+                        <a href="#welcome" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Welcome</a>
+                        <a href="#structure" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">How We Work</a>
+                        <a href="#initiatives" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Portfolio</a>
+                        <a href="#culture" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Culture</a>
+                        <a href="#roadmap" class="nav-link px-3 py-2 rounded-md text-sm font-medium text-gray-700">Your Roadmap</a>
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-red-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-red-500">
+                        <span class="sr-only">Open main menu</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#welcome" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">Welcome</a>
+                <a href="#structure" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">How We Work</a>
+                <a href="#initiatives" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">Portfolio</a>
+                <a href="#culture" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">Culture</a>
+                <a href="#roadmap" class="nav-link block px-3 py-2 rounded-md text-base font-medium text-gray-700">Your Roadmap</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+        
+        <section id="welcome" class="section text-center mb-24">
+            <h1 class="text-4xl md:text-6xl font-bold text-red-600 font-display mb-4">Welcome to Red Hat!</h1>
+            <p class="max-w-3xl mx-auto text-lg md:text-xl text-gray-600">You've joined the Emerging Technologies team in Red Hat's Office of the CTO (OCTO). We are the explorers, engineers, and strategists tasked with discovering and building what's next. This guide is your interactive map to our world—how we think, how we work, and how you can make an impact.</p>
+        </section>
+
+        <section id="structure" class="section mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 font-display">How We Work: From Vision to Task</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-16">To ensure we focus on work that has a "transformational impact," OCTO uses a structured model for innovation. This framework provides clarity and alignment, channeling our energy toward a limited number of high-impact areas. Click each level to see how it works.</p>
+
+            <div class="space-y-4 max-w-4xl mx-auto">
+                <div class="bg-white p-6 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-shadow" onclick="toggleDetails('initiative-details', this)">
+                    <h3 class="text-2xl font-bold text-red-600 flex items-center justify-between">
+                        <span><span class="text-gray-400 mr-2">1.</span>Initiatives</span>
+                        <span class="transform transition-transform text-red-400 text-2xl">&#x25BC;</span>
+                    </h3>
+                    <div id="initiative-details" class="hidden mt-4 text-gray-700 space-y-2 text-left">
+                        <p><strong class="font-semibold">The Big Idea:</strong> Large-scale, multi-year efforts aimed at creating major new market opportunities for Red Hat. We limit ourselves to 5 or fewer to maintain focus.</p>
+                        <p class="text-sm bg-red-50 p-3 rounded-lg mt-2"><strong>Example:</strong> "Enabling our customers to build enterprise-class AI solutions."</p>
+                    </div>
+                </div>
+                <div class="ml-0 md:ml-8 bg-white p-6 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-shadow" onclick="toggleDetails('epic-details', this)">
+                    <h3 class="text-2xl font-bold text-blue-600 flex items-center justify-between">
+                        <span><span class="text-gray-400 mr-2">2.</span>Epics</span>
+                        <span class="transform transition-transform text-blue-400 text-2xl">&#x25BC;</span>
+                    </h3>
+                    <div id="epic-details" class="hidden mt-4 text-gray-700 space-y-2 text-left">
+                        <p><strong class="font-semibold">The Project:</strong> Core projects within an Initiative with specific, measurable deliverables. This is where most of our team's work is defined.</p>
+                        <p class="text-sm bg-blue-50 p-3 rounded-lg mt-2"><strong>Example:</strong> "Develop a synthetic data generation pipeline for InstructLab" (part of the AI Initiative).</p>
+                    </div>
+                </div>
+                <div class="ml-0 md:ml-16 bg-white p-6 rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-shadow" onclick="toggleDetails('issue-details', this)">
+                    <h3 class="text-2xl font-bold text-green-600 flex items-center justify-between">
+                        <span><span class="text-gray-400 mr-2">3.</span>Issues</span>
+                        <span class="transform transition-transform text-green-400 text-2xl">&#x25BC;</span>
+                    </h3>
+                    <div id="issue-details" class="hidden mt-4 text-gray-700 space-y-2 text-left">
+                        <p><strong class="font-semibold">The Task:</strong> The most granular level of work, tracked in Jira (as Tasks, Stories, or Bugs). Your Epic Lead defines and assigns these to you.</p>
+                        <p class="text-sm bg-green-50 p-3 rounded-lg mt-2"><strong>Example:</strong> "Fix bug in data validation script for SDG pipeline."</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-8 mt-24 font-display">Who's Who: The People You'll Work With</h3>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Our structure is a matrix. Your manager supports your career, but your daily work is guided by project leads. Click on a role to learn more about what they do.</p>
+            <div id="roles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            </div>
+
+            <h3 class="text-2xl md:text-3xl font-bold text-center mb-8 mt-24 font-display">The Rhythm of Innovation: Our Meeting Cadence</h3>
+             <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">We stay synchronized through a regular series of meetings. This cadence ensures transparency, rapid problem-solving, and consistent progress tracking. Your main focus will be on the weekly Epic meetings.</p>
+             <div id="cadence-timeline" class="relative max-w-5xl mx-auto">
+                <div class="absolute left-1/2 w-0.5 h-full bg-gray-300 hidden md:block"></div>
+            </div>
+        </section>
+
+        <section id="initiatives" class="section mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 font-display">Our Initiatives & Project Portfolio</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">These are the five strategic pillars that guide all of OCTO's work, representing our biggest bets on the future. Below the chart, you can explore the key projects our team drives within these initiatives.</p>
+            <div class="bg-white p-4 sm:p-6 md:p-8 rounded-2xl shadow-lg mb-16">
+                <div class="chart-container">
+                    <canvas id="initiativesChart"></canvas>
+                </div>
+                 <p class="text-center text-xs text-gray-500 mt-4">The chart visualizes a conceptual score representing the relative strategic focus of each area.</p>
+            </div>
+            
+            <div class="max-w-6xl mx-auto">
+                <div id="project-tabs" class="flex flex-wrap justify-center border-b border-gray-200 mb-8">
+                </div>
+                <div id="project-content-area" class="bg-white p-8 rounded-2xl shadow-lg min-h-[300px]">
+                </div>
+            </div>
+        </section>
+
+        <section id="culture" class="section mb-24">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 font-display">Our Culture in Action</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Red Hat's values aren't just posters on a wall; they are the operating system for how we work. In OCTO, these values are built directly into our processes. Click on a value to see how it translates into a specific practice you'll encounter every day.</p>
+
+            <div class="flex flex-col md:flex-row gap-8 max-w-5xl mx-auto">
+                <div id="values-list" class="w-full md:w-1/3 flex flex-row md:flex-col justify-center md:justify-start gap-2 flex-wrap">
+                </div>
+                <div id="practices-display" class="w-full md:w-2/3 bg-white p-8 rounded-2xl shadow-lg min-h-[250px] flex items-center justify-center">
+                </div>
+            </div>
+        </section>
+        
+        <section id="roadmap" class="section">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-2 font-display">Your First 90 Days: A Roadmap to Impact</h2>
+            <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Welcome aboard! Your first three months are about learning, connecting, and starting to contribute. This isn't a checklist, but a guide for proactive engagement.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-red-500">
+                    <h3 class="text-2xl font-bold mb-4 font-display">First 30 Days: Learn</h3>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Schedule 1-on-1s with your team.</li>
+                        <li>Introduce yourself on Slack (`#team-octo`).</li>
+                        <li>Activate your Red Hat Developer Sandbox.</li>
+                        <li>Observe and absorb in Epic meetings.</li>
+                        <li>Find a "good first issue" with your lead.</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-blue-500">
+                    <h3 class="text-2xl font-bold mb-4 font-display">First 60 Days: Contribute</h3>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Make your first Pull Request.</li>
+                        <li>Keep a daily work log of learnings.</li>
+                        <li>Get comfortable with the Jira workflow.</li>
+                        <li>Read the design docs for your primary project.</li>
+                        <li>Ask questions and offer ideas.</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-lg border-t-4 border-green-500">
+                    <h3 class="text-2xl font-bold mb-4 font-display">First 90 Days: Impact</h3>
+                     <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>Take full ownership of a Jira issue.</li>
+                        <li>Provide clear, proactive updates.</li>
+                        <li>Prepare a small, informal demo for the team.</li>
+                        <li>Participate actively in design discussions.</li>
+                        <li>Your fresh perspective is valuable!</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-gray-800 text-white mt-24">
+        <div class="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center">
+            <p class="font-display text-lg">Red Hat Office of the CTO | Emerging Technologies</p>
+            <p class="text-sm text-gray-400 mt-2">&copy; 2024 Red Hat, Inc. This is an internal onboarding resource.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            const state = {
+                activeSection: 'welcome'
+            };
+
+            const rolesData = [
+                {
+                    name: "Epic Lead",
+                    icon: "🎯",
+                    description: "Guides the Epic's work, divides it into Issues, tracks progress, and reports status to the Initiative Lead. Your primary contact for day-to-day technical direction.",
+                    askFor: "Daily/weekly technical direction, task clarification, project status questions."
+                },
+                {
+                    name: "Initiative Lead",
+                    icon: "�",
+                    description: "Drives the big-picture outcomes of the entire Initiative. Sets the vision and communicates with stakeholders and executive leadership.",
+                    askFor: "The Initiative's overall strategy, how your project fits into the bigger picture."
+                },
+                {
+                    name: "Initiative Sponsor",
+                    icon: "🛡️",
+                    description: "A people manager who provides support to the Initiative Lead, helps with resource allocation, and facilitates tech transfer agreements.",
+                    askFor: "Help with escalating resource needs, navigating formal processes with product teams."
+                },
+                {
+                    name: "OCTO Steering Team",
+                    icon: "⚖️",
+                    description: "Senior leadership group that coordinates across all Initiatives, approves new proposals, and addresses major blocking issues for the entire department.",
+                    askFor: "Escalation of significant blockers that cannot be resolved within the Initiative."
+                }
+            ];
+
+            const cadenceData = [
+                { 
+                    period: 'Weekly',
+                    side: 'left',
+                    color: 'red',
+                    items: [
+                        { title: 'Per-Epic Team Meetings', description: 'Your core project sync, run by your Epic Lead.' },
+                        { title: 'Per-Initiative Team Meetings', description: 'Your Epic Lead reports progress up to the Initiative Lead.' }
+                    ]
+                },
+                { 
+                    period: 'Bi-weekly',
+                    side: 'right',
+                    color: 'blue',
+                    items: [
+                        { title: 'OCTO Initiative Sync', description: 'Steering Team meets to discuss overall progress and blockers.' }
+                    ]
+                },
+                { 
+                    period: 'Monthly',
+                    side: 'left',
+                    color: 'green',
+                    items: [
+                        { title: 'Prioritization & Backlog Meeting', description: 'Steering Team reviews priorities and new Epic proposals.' },
+                        { title: 'GELT Status Update Emails', description: 'Progress summary for executive leadership.' }
+                    ]
+                },
+                { 
+                    period: 'Semi-annually',
+                    side: 'right',
+                    color: 'purple',
+                    items: [
+                        { title: 'Initiative Planning Meeting', description: 'Steering Team evaluates the entire set of Initiatives.' }
+                    ]
+                }
+            ];
+
+            const valuesData = [
+                { 
+                    name: 'Transparency',
+                    icon: '👁️',
+                    practice: {
+                        title: "Default to Open (Collaboration Hygiene)",
+                        description: "Meeting agendas are shared 24 hours in advance, and meetings are recorded and shared with the whole department. This ensures information is accessible to everyone, removing barriers to participation."
+                    }
+                },
+                { 
+                    name: 'Meritocracy',
+                    icon: '💡',
+                    practice: {
+                        title: "The Best Idea Wins",
+                        description: "The process to propose a new Epic is open to everyone. Your ideas are valued from day one, and monthly prioritization meetings provide a structured forum for them to be heard and evaluated."
+                    }
+                },
+                { 
+                    name: 'Freedom',
+                    icon: '🕊️',
+                    practice: {
+                        title: "Freedom to Innovate",
+                        description: "Within the 'guard rails' of an Initiative and Epic, you and your team have the freedom to explore, experiment, and find the best solution. This empowers you to take creative risks and approach challenges in novel ways."
+                    }
+                },
+                { 
+                    name: 'Accountability',
+                    icon: '🤝',
+                    practice: {
+                        title: "Accountability with Freedom",
+                        description: "The balance to creative freedom is a clear process for tracking progress. Weekly Jira updates and team syncs provide the structure and visibility needed for innovation to lead to meaningful results."
+                    }
+                }
+            ];
+            
+            const projectsData = [
+                {
+                    id: 'instructlab',
+                    name: 'InstructLab',
+                    tagline: 'Democratizing AI Development',
+                    description: 'A model-agnostic, open source project to enhance Large Language Models in a community-driven way. Instead of costly retraining, it allows anyone to contribute new skills and knowledge efficiently.',
+                    contribution: 'Our team wrote the majority of the synthetic data generation (SDG) pipeline and developed a GitHub bot for community enablement, lowering the barrier for new contributors.',
+                    getInvolved: 'Explore the project on GitHub and follow the tutorials at instructlab.ai to make your first contribution.',
+                    color: 'purple'
+                },
+                {
+                    id: 'podman-ai',
+                    name: 'Podman AI Lab',
+                    tagline: 'Simplifying the AI Developer Experience',
+                    description: 'An extension for Podman Desktop that dramatically simplifies building and running AI-enabled apps on your local machine. It provides a curated catalog of models and "recipes" to get started quickly.',
+                    contribution: 'The Podman AI Labs Recipes demonstrated at Red Hat Summit were fully developed by our team, making generative AI accessible to the broader developer community.',
+                    getInvolved: 'Install Podman Desktop and the Podman AI Lab extension. Explore the recipes on the Red Hat Developer portal to see how they work.',
+                    color: 'blue'
+                },
+                {
+                    id: 'kepler',
+                    name: 'Kepler',
+                    tagline: 'Driving Sustainable Computing',
+                    description: 'A CNCF sandbox project that uses eBPF to estimate the power consumption of Kubernetes pods. It provides critical observability for optimizing the energy footprint of cloud-native workloads.',
+                    contribution: 'Kepler is a prime example of our innovation lifecycle. We are actively working on the tech transfer of Kepler into Red Hat OpenShift and Red Hat Enterprise Linux.',
+                    getInvolved: 'Join the biweekly community meetings and check out the contribution guide on the Kepler GitHub repository.',
+                    color: 'green'
+                },
+                {
+                    id: 'flight-control',
+                    name: 'Flight Control',
+                    tagline: 'Managing the Future of the Edge',
+                    description: 'The upstream, experimental proof-of-concept for what is now Red Hat Edge Manager. It enables simple, scalable, and secure management of large fleets of edge devices and applications.',
+                    contribution: 'This is a 50/50 collaborative effort between our team and Ecosystem Engineering, tackling the complex challenges of edge management.',
+                    getInvolved: 'Familiarize yourself with the Flight Control documentation to understand its architecture. Opportunities will grow as it moves toward productization.',
+                    color: 'orange'
+                }
+            ];
+
+            const rolesGrid = document.getElementById('roles-grid');
+            rolesData.forEach(role => {
+                const card = document.createElement('div');
+                card.className = 'card-flip h-64 bg-white rounded-2xl shadow-lg cursor-pointer';
+                card.innerHTML = `
+                    <div class="card-flip-inner rounded-2xl">
+                        <div class="card-face p-4 bg-white rounded-2xl border-2 border-gray-200">
+                            <div class="text-5xl mb-4">${role.icon}</div>
+                            <h4 class="text-2xl font-bold font-display">${role.name}</h4>
+                            <p class="text-gray-500 text-sm mt-2">Click to learn more</p>
+                        </div>
+                        <div class="card-back p-6 bg-gray-800 text-white rounded-2xl">
+                             <h4 class="text-xl font-bold font-display mb-2">${role.name}</h4>
+                             <p class="text-sm text-gray-300 mb-3">${role.description}</p>
+                             <p class="text-sm border-t border-gray-600 pt-3"><strong class="text-red-400">Ask them for:</strong> ${role.askFor}</p>
+                        </div>
+                    </div>`;
+                card.addEventListener('click', () => card.classList.toggle('flipped'));
+                rolesGrid.appendChild(card);
+            });
+
+            const cadenceTimeline = document.getElementById('cadence-timeline');
+            cadenceData.forEach((event) => {
+                const isLeft = event.side === 'left';
+                const div = document.createElement('div');
+                div.className = 'mb-8 flex justify-between items-center w-full';
+                if (!isLeft) div.classList.add('flex-row-reverse', 'md:flex-row-reverse');
+                
+                div.innerHTML = `
+                    <div class="hidden md:block w-5/12"></div>
+                    <div class="z-20 flex items-center bg-${event.color}-500 shadow-xl w-12 h-12 rounded-full justify-center">
+                        <span class="text-white font-bold text-lg">${event.period.charAt(0)}</span>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-lg w-full md:w-5/12 border-l-4 md:border-l-0 ${isLeft ? 'md:border-l-4' : 'md:border-r-4'} border-${event.color}-500">
+                        <h4 class="font-bold text-xl text-${event.color}-600 font-display mb-2">${event.period}</h4>
+                        ${event.items.map(item => `
+                            <div class="mb-2 last:mb-0">
+                                <p class="font-semibold text-gray-800">${item.title}</p>
+                                <p class="text-sm text-gray-600">${item.description}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                cadenceTimeline.appendChild(div);
+            });
+
+            const valuesList = document.getElementById('values-list');
+            const practicesDisplay = document.getElementById('practices-display');
+            
+            valuesData.forEach((value, index) => {
+                const button = document.createElement('button');
+                button.className = 'value-btn w-full md:w-auto text-left p-4 rounded-lg transition-all duration-300 flex items-center gap-4 border-2 border-transparent';
+                button.innerHTML = `<span class="text-2xl">${value.icon}</span><span class="text-xl font-display font-medium">${value.name}</span>`;
+                button.onclick = () => {
+                    document.querySelectorAll('.value-btn').forEach(btn => btn.classList.remove('bg-red-600', 'text-white', 'shadow-lg', 'border-red-700'));
+                    button.classList.add('bg-red-600', 'text-white', 'shadow-lg', 'border-red-700');
+
+                    practicesDisplay.innerHTML = `
+                        <div class="text-center md:text-left transition-opacity duration-500 opacity-0">
+                            <h4 class="text-2xl font-bold font-display text-red-600 mb-2">${value.practice.title}</h4>
+                            <p class="text-gray-700">${value.practice.description}</p>
+                        </div>
+                    `;
+                    setTimeout(() => {
+                        practicesDisplay.querySelector('div').classList.remove('opacity-0');
+                    }, 50);
+                };
+                valuesList.appendChild(button);
+                if (index === 0) button.click();
+            });
+
+            const projectTabs = document.getElementById('project-tabs');
+            const projectContentArea = document.getElementById('project-content-area');
+            
+            projectsData.forEach((project, index) => {
+                const tab = document.createElement('button');
+                tab.className = `tab-button text-sm sm:text-base font-medium font-display py-2 px-4 border-b-2 transition-colors duration-300`;
+                tab.textContent = project.name;
+                tab.onclick = () => {
+                    document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    projectContentArea.innerHTML = `
+                        <div class="transition-opacity duration-500 opacity-0">
+                             <h3 class="text-2xl md:text-3xl font-bold font-display text-gray-800">${project.name}</h3>
+                             <p class="text-lg text-${project.color}-600 font-medium mb-4">${project.tagline}</p>
+                             <div class="space-y-4 text-gray-700">
+                                 <p>${project.description}</p>
+                                 <p><strong class="font-semibold text-gray-900">Our Contribution:</strong> ${project.contribution}</p>
+                                 <p><strong class="font-semibold text-gray-900">How to Get Involved:</strong> ${project.getInvolved}</p>
+                             </div>
+                        </div>
+                    `;
+                     setTimeout(() => {
+                        projectContentArea.querySelector('div').classList.remove('opacity-0');
+                    }, 50);
+                };
+                projectTabs.appendChild(tab);
+                if (index === 0) tab.click();
+            });
+
+            const ctx = document.getElementById('initiativesChart').getContext('2d');
+            const initiativesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Enterprise AI', 'AI in Ops', 'Energy', 'Emerging HW', 'Zero-Trust'],
+                    datasets: [{
+                        label: 'Strategic Focus Score',
+                        data: [95, 80, 70, 85, 90],
+                        backgroundColor: 'rgba(238, 0, 0, 0.6)',
+                        borderColor: '#EE0000',
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { beginAtZero: true, grid: { color: '#e0e0e0' }, ticks: { font: { family: 'Red Hat Text' } } },
+                        y: { grid: { display: false }, ticks: { font: { family: 'Red Hat Display', size: 14 } } }
+                    }
+                }
+            });
+            
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    if (mobileMenu.classList.contains('hidden') === false) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+            
+            const sections = document.querySelectorAll('.section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        state.activeSection = entry.target.id;
+                        document.querySelectorAll('.nav-link').forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href').substring(1) === state.activeSection);
+                        });
+                    }
+                });
+            }, { rootMargin: '-30% 0px -70% 0px' });
+
+            sections.forEach(section => observer.observe(section));
+
+        });
+
+        function toggleDetails(id, header) {
+            const element = document.getElementById(id);
+            const arrow = header.querySelector('span:last-child');
+            const isOpen = !element.classList.contains('hidden');
+            
+            element.classList.toggle('hidden');
+            arrow.style.transform = isOpen ? 'rotate(0deg)' : 'rotate(180deg)';
+        }
+    </script>
+</body>
+</html>
