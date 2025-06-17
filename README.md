@@ -1,1 +1,18 @@
-# New Hire Onboarding AI Assistant
+# 🧠 New Hire Onboarding AI Assistant
+
+This project explores how Large Language Models (LLMs) and AI are transforming the creation of websites, content pages etc. This project explores the use of LLMs to build an intelligent assistant designed to streamline the onboarding process for new hires joining a company. This AI-powered tool helps new hires get up to speed faster by answering company-related questions, guiding them through setup tasks and integrating with internal resources.
+
+---
+
+## 🚀 Features
+
+- 🗂️ Personalized onboarding checklist
+- 🔒 Role-specific knowledge access
+- 📚 Continuous learning from updated internal documentation
+
+---
+
+## 🧰 Tech Stack
+
+- **Frontend:** HTML / Tailwind CSS  
+- **AI/LLM:** OpenAI GPT, Google Gemini
